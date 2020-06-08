@@ -1,23 +1,21 @@
-import React, { ReactElement,useState  } from 'react';
+import React from 'react'
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 interface Props {
-    
 }
-
-export default function Header({}: Props): ReactElement {
+const Header: React.SFC<Props> = (_props) => {
     return (
-
         <Navbar bg="light" expand="lg">
-        <Navbar.Brand href="/">Meeting-DBMS</Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="mr-auto">
-            <Nav.Link href="#home">Home</Nav.Link>
-            <Nav.Link href="#link">Link</Nav.Link>
-          </Nav>
-        </Navbar.Collapse>
-      </Navbar>
-  
-    )
+            <Navbar.Brand href="/">Meeting-DBMS</Navbar.Brand>
+            <Navbar.Toggle />
+            <Navbar.Collapse>
+                <Nav className="mr-auto">
+                    <Nav.Link href="/addmeeting">Add Meeting</Nav.Link>
+                    <Nav.Link href="#link">Link</Nav.Link>
+                </Nav>
+            </Navbar.Collapse>
+        </Navbar>
+    );
 }
+
+export default Header
