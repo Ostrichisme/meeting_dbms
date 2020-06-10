@@ -12,6 +12,7 @@ const Header: React.SFC<Props> = (_props) => {
                 <Nav className="mr-auto">
                     <Nav.Link href="/addmeeting">Add Meeting</Nav.Link>
                     <Nav.Link href="/updategrade">Update Grade</Nav.Link>
+                    <Nav.Link href="/showmeetingroom">Show Meeting Room</Nav.Link>
                 </Nav>
             </Navbar.Collapse>
         </Navbar>

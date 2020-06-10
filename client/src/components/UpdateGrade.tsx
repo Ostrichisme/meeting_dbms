@@ -76,10 +76,7 @@ export default class UpdateGrade extends Component<Props, State> {
         return (await sqlQuery(`select E.Name as EName,Sex,Grade,D.Name as DName from employee as E,department as D where E_id='${id}' and E.DNo=D.DNo`)).data[0] as EmpDetail;
     }
     selectedEmpData() {
-        if(Object.keys(this.state.empDetail).length)
             return Object.values(this.state.empDetail).map((value, index) => <td key={index}>{value}</td>);
-        else
-            return null;
     }
     async updateGrade() {
         if (this.state.selectedEmpID === "") {
@@ -122,7 +119,7 @@ export default class UpdateGrade extends Component<Props, State> {
 
                         <Form.Check
                             type="switch"
-                            label="Use SQL editor"
+                            label="Use SQL Editor"
                             id="custom-switch"
                             checked={this.state.isSwitchOn}
                             onChange={() => {
