@@ -11,7 +11,7 @@ const Header: React.SFC<Props> = (_props) => {
             <Navbar.Collapse>
                 <Nav className="mr-auto">
                     <Nav.Link href="/addmeeting">Add Meeting</Nav.Link>
-                    <Nav.Link href="#link">Link</Nav.Link>
+                    <Nav.Link href="/updategrade">Update Grade</Nav.Link>
                 </Nav>
             </Navbar.Collapse>
         </Navbar>
