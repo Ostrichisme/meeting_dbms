@@ -258,7 +258,7 @@ export default class AddMeeting extends Component<Props, State> {
                     <Form hidden={!this.state.isSwitchOn}>
                         <Form.Group>
                             <Form.Label>SQL Editor (Add to Meeting)</Form.Label>
-                            <Form.Control id="MeetingArea" as="textarea" rows={5} placeholder="ex: INSERT INTO meeting (MeetingDate,Time,Subject,E_id) Values ('2020-06-09',14,'discussion','A195474162')
+                            <Form.Control id="MeetingArea" as="textarea" rows={5} placeholder="ex: INSERT INTO meeting (MeetingDate,Time,Subject,E_id) VALUES ('2020-06-09',14,'discussion','A195474162')
                              "/>
                         </Form.Group>
                         <Form.Group>
@@ -270,7 +270,7 @@ export default class AddMeeting extends Component<Props, State> {
                         <Form.Group>
                             <Form.Label>SQL Editor (Add to Attends)</Form.Label>
                             <span id="insertMeetingID" className="errorMsg"></span>
-                            <Form.Control id="AttendsArea" as="textarea" rows={5} placeholder="ex: INSERT INTO attends (E_id,M_id,R_id,AttendDate,Time) Values ('A195474162',15,'B704','2020-06-09',14),('A291653701',15,'B704','2020-06-09',14)" />
+                            <Form.Control id="AttendsArea" as="textarea" rows={5} placeholder="ex: INSERT INTO attends (E_id,M_id,R_id,AttendDate,Time) VALUES ('A195474162',15,'B704','2020-06-09',14),('A291653701',15,'B704','2020-06-09',14)" />
                         </Form.Group>
                         <Form.Group>
                             <Button variant="primary" onClick={() => this.insertSQLAttends()}>

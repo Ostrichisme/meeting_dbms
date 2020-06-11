@@ -116,7 +116,6 @@ export default class UpdateGrade extends Component<Props, State> {
             <Layout>
                 <div className="padding10">
                     <Form>
-
                         <Form.Check
                             type="switch"
                             label="Use SQL Editor"
@@ -165,8 +164,8 @@ export default class UpdateGrade extends Component<Props, State> {
                             </Col>
                             <Col lg={4} hidden={!this.state.isSwitchOn}>
                                 <Form.Group>
-                                    <Form.Label>SQL Editor (Update Grade)</Form.Label>
-                                    <Form.Control id="sqlArea" as="textarea" rows={8} placeholder="UPDATE employee SET Grade=7 WHERE E_id='A192671783'
+                                    <Form.Label>SQL Editor</Form.Label>
+                                    <Form.Control id="sqlArea" as="textarea" rows={8} placeholder="ex: UPDATE employee SET Grade=7 WHERE E_id='A192671783'
                              "/>
                                 </Form.Group>
                                 <Form.Group>

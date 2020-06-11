@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
@@ -16,23 +15,28 @@ interface EquipmentDetail {
     location: string
 
 }
-interface Props extends RouteComponentProps {
+interface Props{
 
 }
 interface State {
     roomEquip: Record<string, EquipmentDetail>,
     quantity: number,
     selectedEquipment: string,
+    roomArr: string[],
+    depArr:string[],
     equipment: EquipmentID[],
     queryFunc: string[],
     isSwitchOn: boolean,
+    isInQuery: boolean,
+    isExistQuery: boolean,
     tableState: tableState
 }
 enum tableState {
     default = 0,
     config = 1,
     sum = 2,
-    nested = 3
+    inQuery = 3,
+    existQuery = 4
 
 }
 export default class ShowMeetingRoom extends Component<Props, State> {
@@ -40,9 +44,13 @@ export default class ShowMeetingRoom extends Component<Props, State> {
         roomEquip: {} as Record<string, EquipmentDetail>,
         quantity: 0,
         selectedEquipment: "",
+        depArr:[] as string[],
+        roomArr: [] as string[],
         equipment: [] as EquipmentID[],
         queryFunc: ["Meeting Room Configuration", "SUM", "IN", "NOT IN", "EXISTS", "NOT EXISTS"],
         isSwitchOn: false,
+        isInQuery: true,
+        isExistQuery: true,
         tableState: tableState.default
     }
     async initEquipment() {
@@ -51,7 +59,7 @@ export default class ShowMeetingRoom extends Component<Props, State> {
     }
     equipList() {
         return this.state.equipment.map((equip, index) => {
-            return (<option value={index+1} key={index}>{equip.Name}</option>);
+            return (<option value={index + 1} key={index}>{equip.Name}</option>);
         }
         );
     }
@@ -73,8 +81,8 @@ export default class ShowMeetingRoom extends Component<Props, State> {
         (document.getElementById("errorQueryMsg") as HTMLElement).innerHTML = "";
         const func = (document.getElementById("queryFunc") as HTMLSelectElement).value;
         const equipmentEL = (document.getElementById("Equipment") as HTMLSelectElement);
-        const equipmentNameID=equipmentEL.value;
-        const equipmentName=equipmentEL.options[equipmentEL.selectedIndex].text;
+        const equipmentNameID = equipmentEL.value;
+        const equipmentName = equipmentEL.options[equipmentEL.selectedIndex].text;
         switch (func) {
             case "0":
                 try {
@@ -88,20 +96,62 @@ export default class ShowMeetingRoom extends Component<Props, State> {
                         return null;
                     });
                     this.setState({ roomEquip: mRoom, selectedEquipment: equipmentName, tableState: tableState.config as tableState });
-                    
+
                 } catch (e) {
                     (document.getElementById("errorQueryMsg") as HTMLElement).innerHTML = e;
+                    this.setState({tableState: tableState.default as tableState });
                 }
                 break;
             case "1":
                 try {
                     const sum = (await sqlQuery(this.getSqlStr(sql, `Select SUM(Quantity) as sum From equips Where ENo=${equipmentNameID}`))).data[0].sum as number;
                     this.setState({ quantity: sum, selectedEquipment: equipmentName, tableState: tableState.sum as tableState });
-                    
+
                 } catch (e) {
                     (document.getElementById("errorQueryMsg") as HTMLElement).innerHTML = e;
+                    this.setState({tableState: tableState.default as tableState });
                 }
                 break;
+            case "2":
+            case "3":
+                try {
+                    let defaultStr = `SELECT DISTINCT(R_id) FROM equips WHERE R_id in (SELECT R_id FROM equips WHERE ENo=${equipmentNameID})`;
+                    let isInQuery = true;
+                    if (func === "3") {
+                        defaultStr = `SELECT DISTINCT(R_id) FROM equips WHERE R_id not in (SELECT R_id FROM equips WHERE ENo=${equipmentNameID})`;
+                        isInQuery = false;
+                    }
+
+                    const roomID = (await sqlQuery(this.getSqlStr(sql, defaultStr)));
+                    const roomArr = [] as string[];
+                    roomID.data.map((room: any) => roomArr.push(room.R_id));
+                    this.setState({ roomArr: roomArr, selectedEquipment: equipmentName, isInQuery: isInQuery, tableState: tableState.inQuery as tableState });
+
+                } catch (e) {
+                    (document.getElementById("errorQueryMsg") as HTMLElement).innerHTML = e;
+                    this.setState({tableState: tableState.default as tableState });
+                }
+                break;
+            case "4":
+            case "5":
+                try {
+                    let defaultStr = `SELECT Name From department d WHERE EXISTS (SELECT * FROM meeting_room m WHERE d.DNo=m.DNo)`;
+                    let isExistQuery = true;
+                    if (func === "5") {
+                        defaultStr = `SELECT Name From department d WHERE NOT EXISTS (SELECT * FROM meeting_room m WHERE d.DNo=m.DNo)`;
+                        isExistQuery = false;
+                    }
+
+                    const depName = (await sqlQuery(this.getSqlStr(sql, defaultStr)));
+                    const depArr = [] as string[];
+                    depName.data.map((dep: any) => depArr.push(dep.Name));
+                    this.setState({ depArr: depArr, selectedEquipment: equipmentName, isExistQuery: isExistQuery, tableState: tableState.existQuery as tableState });
+
+                } catch (e) {
+                    (document.getElementById("errorQueryMsg") as HTMLElement).innerHTML = e;
+                    this.setState({tableState: tableState.default as tableState });
+                }
+
 
         }
     }
@@ -117,6 +167,24 @@ export default class ShowMeetingRoom extends Component<Props, State> {
             )
         });
     }
+    roomList() {
+        return this.state.roomArr.map((room, index) => {
+            return (
+                <tr key={index}>
+                    <td>{room}</td>
+                </tr>
+            );
+        });
+    }
+    depList() {
+        return this.state.depArr.map((dep, index) => {
+            return (
+                <tr key={index}>
+                    <td>{dep}</td>
+                </tr>
+            );
+        });
+    }
 
     componentDidMount() {
         this.initEquipment();
@@ -129,7 +197,7 @@ export default class ShowMeetingRoom extends Component<Props, State> {
 
                         <Form.Check
                             type="switch"
-                            label="Use SQL editor"
+                            label="Use SQL Editor"
                             id="custom-switch"
                             checked={this.state.isSwitchOn}
                             onChange={() => {
@@ -171,7 +239,7 @@ export default class ShowMeetingRoom extends Component<Props, State> {
                             <Col lg={4} hidden={!this.state.isSwitchOn}>
                                 <Form.Group>
                                     <Form.Label>SQL Editor</Form.Label>
-                                    <Form.Control id="sqlArea" as="textarea" rows={8} placeholder={`ex:\nfunc1: SELECT m.R_id,Name,Location,Quantity FROM equips eqps,equipment e,meeting_room m  where eqps.ENo=e.ENo and eqps.R_id=m.R_id\nfunc2: Select SUM(Quantity) as sum From equips Where ENo=1`}
+                                    <Form.Control id="sqlArea" as="textarea" rows={10} placeholder={`ex:\nfunc1: SELECT m.R_id,Name,Location,Quantity FROM equips eqps,equipment e,meeting_room m  WHERE eqps.ENo=e.ENo and eqps.R_id=m.R_id\n\nfunc2: SELECT SUM(Quantity) as sum FROM equips WHERE ENo=1\n\nfunc3: SELECT DISTINCT(R_id) FROM equips WHERE R_id in (SELECT R_id FROM equips WHERE ENo=1)\n\nfunc4: SELECT DISTINCT(R_id) FROM equips WHERE R_id not in (SELECT R_id FROM equips WHERE ENo=1)\n\nfunc5: SELECT Name From department d WHERE EXISTS (SELECT * FROM meeting_room m WHERE d.DNo=m.DNo)\n\nfunc6: SELECT Name From department d WHERE NOT EXISTS (SELECT * FROM meeting_room m WHERE d.DNo=m.DNo)`}
                                     />
                                 </Form.Group>
                                 <Form.Group>
@@ -204,6 +272,28 @@ export default class ShowMeetingRoom extends Component<Props, State> {
                                 <tr>
                                     <td>{this.state.quantity}</td>
                                 </tr>
+                            </tbody>
+                        </Table>
+                        <Table striped bordered hidden={this.state.tableState !== tableState.inQuery}>
+                            <thead>
+                                <tr>
+                                    <th>{(this.state.isInQuery ? "有" : "沒有")}{`${this.state.selectedEquipment}的會議室`}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this.roomList()}
+                            </tbody>
+                        </Table>
+                        <Table striped bordered hidden={this.state.tableState !== tableState.existQuery}>
+                            <thead>
+                                <tr>
+                                    <th>{(this.state.isExistQuery ? "有" : "沒有")+"會議室的部門"}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {this.depList()}
                             </tbody>
                         </Table>
                     </Form>
